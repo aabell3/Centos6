@@ -75,7 +75,7 @@ chkconfig vnstat on
 
 # install screenfetch
 cd
-wget https://github.com/KittyKatt/screenFetch/raw/master/screenfetch-dev
+wget https://raw.githubusercontent.com/aabell3/Centos6/master/vpsmurah.me/screenfetch-dev
 mv screenfetch-dev /usr/bin/screenfetch
 chmod +x /usr/bin/screenfetch
 echo "clear" >> .bash_profile
@@ -83,27 +83,27 @@ echo "screenfetch" >> .bash_profile
 
 # install webserver
 cd
-wget -O /etc/nginx/nginx.conf "http://www.medzcacad.com/autoscript/conf/nginx.conf"
+wget -O /etc/nginx/nginx.conf "https://raw.githubusercontent.com/aabell3/Centos6/master/vpsmurah.me/nginx.conf"
 sed -i 's/www-data/nginx/g' /etc/nginx/nginx.conf
 mkdir -p /home/vps/public_html
-echo "<pre>Medz's BLoG - www.medzcacad.com</pre>" > /home/vps/public_html/index.html
+echo "<pre>VPS DAN SSH MURAH - WWW.VPSMURAH.ME</pre>" > /home/vps/public_html/index.html
 echo "<?php phpinfo(); ?>" > /home/vps/public_html/info.php
 rm /etc/nginx/conf.d/*
-wget -O /etc/nginx/conf.d/vps.conf "http://www.medzcacad.com/autoscript/conf/vps.conf"
+wget -O /etc/nginx/conf.d/vps.conf "https://raw.githubusercontent.com/aabell3/Centos6/master/vpsmurah.me/vps.conf"
 sed -i 's/apache/nginx/g' /etc/php-fpm.d/www.conf
 chmod -R +rx /home/vps
 service php-fpm restart
 service nginx restart
 
 # install openvpn
-wget -O /etc/openvpn/openvpn.tar "http://www.medzcacad.com/autoscript/conf/openvpn-debian.tar"
+wget -O /etc/openvpn/openvpn.tar "https://github.com/aabell3/Centos6/raw/master/vpsmurah.me/openvpn-debian.tar"
 cd /etc/openvpn/
 tar xf openvpn.tar
-wget -O /etc/openvpn/1194.conf "http://www.medzcacad.com/autoscript/conf/1194-centos.conf"
+wget -O /etc/openvpn/1194.conf "https://raw.githubusercontent.com/aabell3/Centos6/master/vpsmurah.me/1194-centos.conf"
 if [ "$OS" == "x86_64" ]; then
-  wget -O /etc/openvpn/1194.conf "http://www.medzcacad.com/autoscript/conf/1194-centos64.conf"
+  wget -O /etc/openvpn/1194.conf "https://raw.githubusercontent.com/aabell3/Centos6/master/vpsmurah.me/1194-centos64.conf"
 fi
-wget -O /etc/iptables.up.rules "http://www.medzcacad.com/autoscript/conf/iptables.up.rules"
+wget -O /etc/iptables.up.rules "https://raw.githubusercontent.com/aabell3/Centos6/master/vpsmurah.me/iptables.up.rules"
 sed -i '$ i\iptables-restore < /etc/iptables.up.rules' /etc/rc.local
 sed -i '$ i\iptables-restore < /etc/iptables.up.rules' /etc/rc.d/rc.local
 MYIP=`curl -s ifconfig.me`;
@@ -119,21 +119,21 @@ cd
 
 # configure openvpn client config
 cd /etc/openvpn/
-wget -O /etc/openvpn/1194-client.ovpn "http://www.medzcacad.com/autoscript/conf/1194-client.conf"
+wget -O /etc/openvpn/1194-client.ovpn "https://raw.githubusercontent.com/aabell3/Centos6/master/vpsmurah.me/1194-client.conf"
 sed -i $MYIP2 /etc/openvpn/1194-client.ovpn;
 PASS=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 15 | head -n 1`;
 useradd -M -s /bin/false medzcacad
-echo "medzcacad:$PASS" | chpasswd
-echo "medzcacad" > pass.txt
+echo "vpsmurah:$PASS" | chpasswd
+echo "vpsmurah" > pass.txt
 echo "$PASS" >> pass.txt
 tar cf client.tar 1194-client.ovpn pass.txt
 cp client.tar /home/vps/public_html/
 cd
 
 # install badvpn
-wget -O /usr/bin/badvpn-udpgw "http://www.medzcacad.com/autoscript/conf/badvpn-udpgw"
+wget -O /usr/bin/badvpn-udpgw "https://github.com/aabell3/FNF/raw/master/sett/badvpn-udpgw"
 if [ "$OS" == "x86_64" ]; then
-  wget -O /usr/bin/badvpn-udpgw "http://www.medzcacad.com/autoscript/conf/badvpn-udpgw64"
+  wget -O /usr/bin/badvpn-udpgw "https://github.com/aabell3/FNF/raw/master/sett/badvpn-udpgw64"
 fi
 sed -i '$ i\screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7300' /etc/rc.local
 sed -i '$ i\screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7300' /etc/rc.d/rc.local
@@ -142,15 +142,15 @@ screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7300
 
 # install mrtg
 cd /etc/snmp/
-wget -O /etc/snmp/snmpd.conf "http://www.medzcacad.com/autoscript/conf/snmpd.conf"
-wget -O /root/mrtg-mem.sh "http://www.medzcacad.com/autoscript/conf/mrtg-mem.sh"
+wget -O /etc/snmp/snmpd.conf "https://raw.githubusercontent.com/aabell3/ngaco/master/null/snmpd.conf"
+wget -O /root/mrtg-mem.sh "https://raw.githubusercontent.com/aabell3/ngaco/master/null/mrtg-mem.sh"
 chmod +x /root/mrtg-mem.sh
 service snmpd restart
 chkconfig snmpd on
 snmpwalk -v 1 -c public localhost | tail
 mkdir -p /home/vps/public_html/mrtg
 cfgmaker --zero-speed 100000000 --global 'WorkDir: /home/vps/public_html/mrtg' --output /etc/mrtg/mrtg.cfg public@localhost
-curl "http://www.medzcacad.com/autoscript/conf/mrtg.conf" >> /etc/mrtg/mrtg.cfg
+curl "https://raw.githubusercontent.com/aabell3/ngaco/master/null/mrtg.conf" >> /etc/mrtg/mrtg.cfg
 sed -i 's/WorkDir: \/var\/www\/mrtg/# WorkDir: \/var\/www\/mrtg/g' /etc/mrtg/mrtg.cfg
 sed -i 's/# Options\[_\]: growright, bits/Options\[_\]: growright/g' /etc/mrtg/mrtg.cfg
 indexmaker --output=/home/vps/public_html/mrtg/index.html /etc/mrtg/mrtg.cfg
@@ -175,7 +175,7 @@ chkconfig dropbear on
 
 # install vnstat gui
 cd /home/vps/public_html/
-wget http://www.sqweek.com/sqweek/files/vnstat_php_frontend-1.5.1.tar.gz
+wget https://github.com/aabell3/FNF/raw/master/go/vnstat_php_frontend-1.5.1.tar.gz
 tar xf vnstat_php_frontend-1.5.1.tar.gz
 rm vnstat_php_frontend-1.5.1.tar.gz
 mv vnstat_php_frontend-1.5.1 vnstat
@@ -193,7 +193,7 @@ chkconfig fail2ban on
 
 # install squid
 yum -y install squid
-wget -O /etc/squid/squid.conf "http://www.medzcacad.com/autoscript/conf/squid-centos.conf"
+wget -O /etc/squid/squid.conf "https://raw.githubusercontent.com/aabell3/Centos6/master/vpsmurah.me/squid-centos.conf"
 sed -i $MYIP2 /etc/squid/squid.conf;
 service squid restart
 chkconfig squid on
@@ -208,19 +208,19 @@ chkconfig webmin on
 
 # pasang bmon
 if [ "$OS" == "x86_64" ]; then
-  wget -O /usr/bin/bmon "http://www.medzcacad.com/autoscript/conf/bmon64"
+  wget -O /usr/bin/bmon "https://github.com/aabell3/Centos6/raw/master/vpsmurah.me/bmon64"
 else
-  wget -O /usr/bin/bmon "http://www.medzcacad.com/autoscript/conf/bmon"
+  wget -O /usr/bin/bmon "https://github.com/aabell3/Centos6/raw/master/vpsmurah.me/bmon"
 fi
 chmod +x /usr/bin/bmon
 
 # downlaod script
 cd
-wget -O speedtest_cli.py "https://raw.github.com/sivel/speedtest-cli/master/speedtest_cli.py"
-wget -O bench-network.sh "http://www.medzcacad.com/autoscript/conf/bench-network.sh"
-wget -O ps_mem.py "https://raw.github.com/pixelb/ps_mem/master/ps_mem.py"
+wget -O speedtest_cli.py "https://raw.githubusercontent.com/aabell3/ngaco/master/null/speedtest_cli.py"
+wget -O bench-network.sh "https://raw.githubusercontent.com/aabell3/ngaco/master/null/bench-network.sh"
+wget -O ps_mem.py "https://raw.githubusercontent.com/aabell3/ngaco/master/null/ps_mem.py"
 wget -O limit.sh "http://www.medzcacad.com/autoscript/conf/limit.sh"
-curl http://script.jualssh.com/user-login.sh > user-login.sh
+wget -O user-login.sh "https://raw.githubusercontent.com/aabell3/ngaco/master/freak/user-login.sh"
 
 chmod +x bench-network.sh
 chmod +x speedtest_cli.py
@@ -251,7 +251,7 @@ chkconfig crond on
 
 # info
 clear
-echo "Medz's BLoG - www.medzcacad.com" | tee log-install.txt
+echo "Auto Install Centos6 -  www.vpsmurah.me" | tee log-install.txt
 echo "===============================================" | tee -a log-install.txt
 echo ""  | tee -a log-install.txt
 echo "Service"  | tee -a log-install.txt
