@@ -1,8 +1,8 @@
 # Centos6
 
-wget http://www.medzcacad.com/autoscript/centos6-kvm.sh
+wget https://raw.githubusercontent.com/aabell3/Centos6/master/centos6.sh
 
-bash debian7.sh
+bash centos6.sh
 
 OpenVPN   : TCP 1194 (client config : http://xxx.xxx.xxx.xxx/client.tar)
 
