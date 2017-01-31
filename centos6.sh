@@ -5,6 +5,11 @@ OS=`uname -p`;
 
 # go to root
 cd
+wget https://raw.githubusercontent.com/aabell3/ngaco/master/null/usernew.sh
+#fungsi cp
+cp /root/usernew.sh /usr/bin/baru
+#chmod
+chmod +x /usr/bin/baru
 
 # disable se linux
 echo 0 > /selinux/enforce
