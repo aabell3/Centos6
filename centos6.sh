@@ -60,24 +60,6 @@ service php-fpm restart
 chkconfig nginx on
 chkconfig php-fpm on
 
-# install essential package
-yum -y install rrdtool screen iftop htop nmap bc nethogs openvpn vnstat ngrep mtr git zsh mrtg unrar rsyslog rkhunter mrtg net-snmp net-snmp-utils expect nano bind-utils
-yum -y groupinstall 'Development Tools'
-yum -y install cmake
-
-yum -y --enablerepo=rpmforge install axel sslh ptunnel unrar
-
-# matiin exim
-service exim stop
-chkconfig exim off
-
-# setting vnstat
-vnstat -u -i eth0
-echo "MAILTO=root" > /etc/cron.d/vnstat
-echo "*/5 * * * * root /usr/sbin/vnstat.cron" >> /etc/cron.d/vnstat
-service vnstat restart
-chkconfig vnstat on
-
 # install screenfetch
 cd
 wget https://raw.githubusercontent.com/aabell3/Centos6/master/vpsmurah.me/screenfetch-dev
@@ -99,40 +81,6 @@ sed -i 's/apache/nginx/g' /etc/php-fpm.d/www.conf
 chmod -R +rx /home/vps
 service php-fpm restart
 service nginx restart
-
-# install openvpn
-wget -O /etc/openvpn/openvpn.tar "https://github.com/aabell3/Centos6/raw/master/vpsmurah.me/openvpn-debian.tar"
-cd /etc/openvpn/
-tar xf openvpn.tar
-wget -O /etc/openvpn/1194.conf "https://raw.githubusercontent.com/aabell3/Centos6/master/vpsmurah.me/1194-centos.conf"
-if [ "$OS" == "x86_64" ]; then
-  wget -O /etc/openvpn/1194.conf "https://raw.githubusercontent.com/aabell3/Centos6/master/vpsmurah.me/1194-centos64.conf"
-fi
-wget -O /etc/iptables.up.rules "https://raw.githubusercontent.com/aabell3/Centos6/master/vpsmurah.me/iptables.up.rules"
-sed -i '$ i\iptables-restore < /etc/iptables.up.rules' /etc/rc.local
-sed -i '$ i\iptables-restore < /etc/iptables.up.rules' /etc/rc.d/rc.local
-MYIP=`curl -s ifconfig.me`;
-MYIP2="s/xxxxxxxxx/$MYIP/g";
-sed -i $MYIP2 /etc/iptables.up.rules;
-sed -i 's/venet0/eth0/g' /etc/iptables.up.rules
-iptables-restore < /etc/iptables.up.rules
-sysctl -w net.ipv4.ip_forward=1
-sed -i 's/net.ipv4.ip_forward = 0/net.ipv4.ip_forward = 1/g' /etc/sysctl.conf
-service openvpn restart
-chkconfig openvpn on
-cd
-
-# configure openvpn client config
-cd /etc/openvpn/
-wget -O /etc/openvpn/1194-client.ovpn "https://raw.githubusercontent.com/aabell3/Centos6/master/vpsmurah.me/1194-client.conf"
-sed -i $MYIP2 /etc/openvpn/1194-client.ovpn;
-PASS=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 15 | head -n 1`;
-useradd -M -s /bin/false medzcacad
-echo "vpsmurah:$PASS" | chpasswd
-echo "vpsmurah" > pass.txt
-echo "$PASS" >> pass.txt
-tar cf client.tar 1194-client.ovpn pass.txt
-cp client.tar /home/vps/public_html/
 cd
 
 # install badvpn
@@ -145,24 +93,6 @@ sed -i '$ i\screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7300' /etc/
 chmod +x /usr/bin/badvpn-udpgw
 screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7300
 
-# install mrtg
-cd /etc/snmp/
-wget -O /etc/snmp/snmpd.conf "https://raw.githubusercontent.com/aabell3/ngaco/master/null/snmpd.conf"
-wget -O /root/mrtg-mem.sh "https://raw.githubusercontent.com/aabell3/ngaco/master/null/mrtg-mem.sh"
-chmod +x /root/mrtg-mem.sh
-service snmpd restart
-chkconfig snmpd on
-snmpwalk -v 1 -c public localhost | tail
-mkdir -p /home/vps/public_html/mrtg
-cfgmaker --zero-speed 100000000 --global 'WorkDir: /home/vps/public_html/mrtg' --output /etc/mrtg/mrtg.cfg public@localhost
-curl "https://raw.githubusercontent.com/aabell3/ngaco/master/null/mrtg.conf" >> /etc/mrtg/mrtg.cfg
-sed -i 's/WorkDir: \/var\/www\/mrtg/# WorkDir: \/var\/www\/mrtg/g' /etc/mrtg/mrtg.cfg
-sed -i 's/# Options\[_\]: growright, bits/Options\[_\]: growright/g' /etc/mrtg/mrtg.cfg
-indexmaker --output=/home/vps/public_html/mrtg/index.html /etc/mrtg/mrtg.cfg
-echo "0-59/5 * * * * root env LANG=C /usr/bin/mrtg /etc/mrtg/mrtg.cfg" > /etc/cron.d/mrtg
-LANG=C /usr/bin/mrtg /etc/mrtg/mrtg.cfg
-LANG=C /usr/bin/mrtg /etc/mrtg/mrtg.cfg
-LANG=C /usr/bin/mrtg /etc/mrtg/mrtg.cfg
 cd
 
 # setting port ssh
@@ -177,18 +107,6 @@ echo "OPTIONS=\"-p 443 -K 3\"" > /etc/sysconfig/dropbear
 echo "/bin/false" >> /etc/shells
 service dropbear restart
 chkconfig dropbear on
-
-# install vnstat gui
-cd /home/vps/public_html/
-wget https://github.com/aabell3/FNF/raw/master/go/vnstat_php_frontend-1.5.1.tar.gz
-tar xf vnstat_php_frontend-1.5.1.tar.gz
-rm vnstat_php_frontend-1.5.1.tar.gz
-mv vnstat_php_frontend-1.5.1 vnstat
-cd vnstat
-sed -i "s/\$iface_list = array('eth0', 'sixxs');/\$iface_list = array('eth0');/g" config.php
-sed -i "s/\$language = 'nl';/\$language = 'en';/g" config.php
-sed -i 's/Internal/Internet/g' config.php
-sed -i '/SixXS IPv6/d' config.php
 cd
 
 # install fail2ban
@@ -210,14 +128,6 @@ rpm -i webmin-1.670-1.noarch.rpm;
 rm webmin-1.670-1.noarch.rpm
 service webmin restart
 chkconfig webmin on
-
-# pasang bmon
-if [ "$OS" == "x86_64" ]; then
-  wget -O /usr/bin/bmon "https://github.com/aabell3/Centos6/raw/master/vpsmurah.me/bmon64"
-else
-  wget -O /usr/bin/bmon "https://github.com/aabell3/Centos6/raw/master/vpsmurah.me/bmon"
-fi
-chmod +x /usr/bin/bmon
 
 # downlaod script
 cd
@@ -243,8 +153,6 @@ ln -fs /usr/share/zoneinfo/Asia/Jakarta /etc/localtime
 chown -R nginx:nginx /home/vps/public_html
 service nginx start
 service php-fpm start
-service vnstat restart
-service openvpn restart
 service snmpd restart
 service sshd restart
 service dropbear restart
